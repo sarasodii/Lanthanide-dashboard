@@ -1,73 +1,210 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Page Setup
 st.set_page_config(page_title="Lanthanide Chemistry Dashboard", layout="wide")
 
-st.title("🧪 Lanthanide Chemistry: Trends, Colors, Geometries & Extraction")
+st.title("🧪 Interactive Lanthanide Chemistry Suite")
 st.markdown("""
-An interactive dashboard modeling core lanthanide principles: **periodic contraction, basicity trends, ion colors, coordination geometry, and industrial extraction from ore.**
+An interactive platform modeling core $4f$ principles: **periodic contraction, basicity trends, ion colors, 3D coordination polyhedra, and industrial extraction from ore.**
 """)
 
 # Create 3 Tabs
-tab1, tab2, tab3 = st.tabs(["📊 Sizes, Basicity & Trends", "🎨 Ion Colors & Coordination Geometries", "⛏️ Ore Processing & Extraction"])
+tab1, tab2, tab3 = st.tabs(["🧩 Periodic Grid & Basicity", "🎨 Colors & 3D Coordination Shapes", "⛏️ Ore Processing & Extraction"])
 
-# --- TAB 1: SIZES, BASICITY & TRENDS ---
+# --- TAB 1: INTERACTIVE PERIODIC TABLE GRID & BASICITY ---
 with tab1:
-    st.subheader("1. Lanthanide Contraction & Basicity Trend")
+    st.subheader("1. Periodic Table Grid: Lanthanide Contraction & Basicity")
     st.markdown("""
-    Due to poor shielding by $4f$ electrons, effective nuclear charge increases across the series, causing a steady decrease in atomic and ionic radii (**Lanthanide Contraction**).
-    * **Basicity Rule:** As ionic radius decreases ($\text{La}^{3+} \\rightarrow \text{Lu}^{3+}$), charge density increases, covalent character of $\text{M--OH}$ bonds increases, and **basicity decreases**.
-    * **Most Basic Hydroxide:** $\text{La(OH)}_3$ (largest radius, most ionic)
-    * **Least Basic Hydroxide:** $\text{Lu(OH)}_3$ (smallest radius, most covalent)
+    Explore the $4f$ series below. Color shading reflects **ionic radius contraction** across $\text{La}^{3+} \\rightarrow \text{Lu}^{3+}$.
     """)
 
     data = {
         "Element": ["La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"],
-        "Atomic Number": list(range(57, 72)),
-        "Ionic Radius 3+ (pm)": [103.2, 101.0, 99.0, 98.3, 97.0, 95.8, 94.7, 93.8, 92.3, 91.2, 90.1, 89.0, 88.0, 86.8, 86.1],
-        "Relative Basicity": ["Highest", "High", "High", "Moderate", "Moderate", "Moderate", "Moderate", "Moderate", "Low", "Low", "Low", "Low", "Low", "Very Low", "Lowest"]
+        "Name": ["Lanthanum", "Cerium", "Praseodymium", "Neodymium", "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium", "Lutetium"],
+        "Z": list(range(57, 72)),
+        "Config": ["4f⁰", "4f¹", "4f²", "4f³", "4f⁴", "4f⁵", "4f⁶", "4f⁷", "4f⁸", "4f⁹", "4f¹⁰", "4f¹¹", "4f¹²", "4f¹³", "4f¹⁴"],
+        "Radius": [103.2, 101.0, 99.0, 98.3, 97.0, 95.8, 94.7, 93.8, 92.3, 91.2, 90.1, 89.0, 88.0, 86.8, 86.1],
+        "pH": [8.35, 7.60, 7.35, 7.00, 6.85, 6.75, 6.60, 6.55, 6.50, 6.40, 6.35, 6.30, 6.25, 6.20, 6.15],
+        "Basicity": ["Most Basic", "Very High", "High", "High", "Moderate", "Moderate", "Moderate", "Moderate", "Low", "Low", "Low", "Low", "Very Low", "Very Low", "Least Basic"]
     }
     df = pd.DataFrame(data)
 
-    fig = px.line(
-        df, 
-        x="Element", 
-        y="Ionic Radius 3+ (pm)", 
-        markers=True, 
-        text="Ionic Radius 3+ (pm)",
-        title="Ionic Radius Contraction (pm) across La3+ to Lu3+",
-        hover_data=["Relative Basicity"]
-    )
-    fig.update_traces(textposition="top center", line_color="#2b5c8f", marker=dict(size=8))
-    st.plotly_chart(fig, use_container_width=True)
+    # Render Periodic Table Row as Grid Cards using Columns
+    st.markdown("### ⚛️ The $4f$ Lanthanide Series ($Z = 57$ to $71$):")
+    
+    # Render 15 Element Squares horizontally in a styled responsive layout
+    cols = st.columns(15)
+    for idx, row in df.iterrows():
+        with cols[idx]:
+            # Heatmap color scale calculation (Blue to Purple)
+            val_norm = (row['Radius'] - 86.1) / (103.2 - 86.1)
+            bg_color = f"rgba({int(40 + 180 * (1 - val_norm))}, {int(100 + 50 * val_norm)}, {int(200 + 55 * val_norm)}, 0.25)"
+            border_color = f"rgb({int(40 + 180 * (1 - val_norm))}, 120, 220)"
+            
+            st.markdown(f"""
+            <div style="
+                border: 2px solid {border_color}; 
+                border-radius: 8px; 
+                padding: 6px; 
+                text-align: center; 
+                background-color: {bg_color};
+                margin-bottom: 10px;">
+                <span style="font-size: 10px; color: #888;">{row['Z']}</span><br/>
+                <strong style="font-size: 18px;">{row['Element']}</strong><br/>
+                <span style="font-size: 11px; color: #555;">{row['Radius']} pm</span><br/>
+                <span style="font-size: 9px; color: #888;">{row['Config']}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-# --- TAB 2: ION COLORS & COORDINATION GEOMETRIES ---
+    st.markdown("---")
+
+    # Interactive Detail Inspector
+    col_left, col_right = st.columns([1, 2])
+
+    with col_left:
+        selected_elem = st.selectbox("🔍 Select an element to inspect its properties:", df["Element"], index=0)
+        elem_data = df[df["Element"] == selected_elem].iloc[0]
+
+        st.info(f"""
+        **Element Details: {elem_data['Name']} ({elem_data['Element']})**
+        * **Atomic Number ($Z$):** {elem_data['Z']}
+        * **$4f$ Electronic Config:** [{elem_data['Config']}]
+        * **Ionic Radius ($\text{{Ln}}^{{3+}}$):** {elem_data['Radius']} pm
+        * **Hydroxide Precipitation $\text{{pH}}$:** {elem_data['pH']}
+        * **Relative Basicity:** {elem_data['Basicity']}
+        """)
+
+    with col_right:
+        # Styled Visual Comparison Chart for Radius & Basicity pH
+        fig_bar = go.Figure()
+        
+        # Highlight selected element in the bar chart
+        colors = ['#1f77b4' if elem != selected_elem else '#ff7f0e' for elem in df["Element"]]
+        
+        fig_bar.add_trace(go.Bar(
+            x=df["Element"],
+            y=df["Radius"],
+            name="Ionic Radius (pm)",
+            marker_color=colors,
+            text=df["Radius"],
+            textposition="auto"
+        ))
+
+        fig_bar.update_layout(
+            title="Ionic Radius Contraction Across $4f$ Series (Selected Element Highlighted)",
+            xaxis_title="Lanthanide Element",
+            yaxis_title="Ionic Radius (pm)",
+            yaxis=dict(range=[80, 110]),
+            height=350,
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("""
+    💡 **Basicity Trend Rule:** Larger light lanthanides ($\text{La}^{3+}$) have higher ionic character and form the most basic hydroxides ($\text{pH} \\approx 8.35$). 
+    Smaller heavy lanthanides ($\text{Lu}^{3+}$) have higher charge density, increased covalent bond character, and lower basicity ($\text{pH} \\approx 6.15$).
+    """)
+
+# --- TAB 2: COLORS & 3D COORDINATION SHAPES ---
 with tab2:
-    col1, col2 = st.columns(2)
+    st.subheader("🎨 Lanthanide Colors & 3D Coordination Geometries")
+    
+    col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.subheader("🎨 Lanthanide Ion Colors (3+ Aqueous)")
-        st.markdown("Colors arise from parity-forbidden **$f\text{--}f$ transitions**. Ions with $f^0$ ($\text{La}^{3+}$), $f^7$ ($\text{Gd}^{3+}$), or $f^{14}$ ($\text{Lu}^{3+}$) configuration are colorless.")
+        st.markdown("### Aqueous Ion Colors ($3+$)")
+        st.markdown("Colors arise from parity-forbidden **$f\\text{--}f$ transitions**. Ions with $f^0$ ($\text{La}^{3+}$), $f^7$ ($\text{Gd}^{3+}$), or $f^{14}$ ($\text{Lu}^{3+}$) configuration are colorless.")
         
         color_data = {
             "Ion": ["La3+", "Ce3+", "Pr3+", "Nd3+", "Sm3+", "Eu3+", "Gd3+", "Tb3+", "Dy3+", "Ho3+", "Er3+", "Tm3+", "Yb3+", "Lu3+"],
             "f-config": ["4f0", "4f1", "4f2", "4f3", "4f5", "4f6", "4f7", "4f8", "4f9", "4f10", "4f11", "4f12", "4f13", "4f14"],
             "Observed Color": ["Colorless", "Colorless/UV", "Green", "Pink / Lilac", "Pale Yellow", "Pale Pink", "Colorless", "Pale Pink", "Pale Yellow", "Yellow", "Pink", "Pale Blue", "Colorless", "Colorless"]
         }
-        st.dataframe(pd.DataFrame(color_data), use_container_width=True)
+        st.dataframe(pd.DataFrame(color_data), height=400, use_container_width=True)
 
     with col2:
-        st.subheader("📐 High Coordination Numbers & Shapes")
-        st.markdown("Due to large ionic radii and non-directional $f$-orbitals, lanthanides prefer **high coordination numbers (CN 8 to 12)** governed by steric factors rather than orbital hybridization.")
+        st.markdown("### Interactive 3D Coordination Polyhedra Viewer")
+        st.markdown("Select a coordination number ($\text{CN}$) to rotate and inspect the 3D geometric polyhedra commonly adopted by lanthanide complexes:")
         
-        st.markdown("""
-        * **CN = 6:** Octahedral (rare, restricted sterically by bulky ligands).
-        * **CN = 8:** Square Antiprismatic or Dodecahedral (e.g., $[\text{Eu}(\text{acac})_3(\text{phen})]$).
-        * **CN = 9:** Tricapped Trigonal Prismatic (e.g., aqua ions $[\text{Ln}(\text{H}_2\text{O})_9]^{3+}$ for light lanthanides).
-        * **CN = 12:** Icosahedral (e.g., nitrate complexes $[\text{Ce}(\text{NO}_3)_6]^{3-}$ in ceric ammonium nitrate).
-        """)
+        shape_choice = st.selectbox(
+            "Select Coordination Number (CN) & Geometry:",
+            ["CN = 6: Octahedron", "CN = 8: Square Antiprism", "CN = 9: Tricapped Trigonal Prism", "CN = 12: Icosahedron"]
+        )
+
+        def generate_3d_shape(shape):
+            fig_3d = go.Figure()
+            # Central Metal Ion
+            fig_3d.add_trace(go.Scatter3d(
+                x=[0], y=[0], z=[0],
+                mode='markers+text',
+                marker=dict(size=14, color='gold'),
+                name='Ln3+ Metal Center',
+                text=['Ln3+'], textposition='top center'
+            ))
+            
+            coords = []
+            shape_title = ""
+            
+            if "CN = 6" in shape:
+                shape_title = "CN = 6: Octahedral Geometry"
+                coords = [[1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1]]
+            elif "CN = 8" in shape:
+                shape_title = "CN = 8: Square Antiprism Geometry"
+                coords = [
+                    [1,1,0.7], [-1,1,0.7], [-1,-1,0.7], [1,-1,0.7],
+                    [1.4,0,-0.7], [0,1.4,-0.7], [-1.4,0,-0.7], [0,-1.4,-0.7]
+                ]
+            elif "CN = 9" in shape:
+                shape_title = "CN = 9: Tricapped Trigonal Prism"
+                coords = [
+                    [0.8, 0, 1], [-0.4, 0.7, 1], [-0.4, -0.7, 1],
+                    [0.8, 0, -1], [-0.4, 0.7, -1], [-0.4, -0.7, -1],
+                    [1.1, 0, 0], [-0.6, 1.0, 0], [-0.6, -1.0, 0]
+                ]
+            elif "CN = 12" in shape:
+                shape_title = "CN = 12: Icosahedron Geometry"
+                phi = (1 + 5**0.5) / 2
+                coords = [
+                    [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+                    [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+                    [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+                ]
+
+            coords = np.array(coords)
+            
+            fig_3d.add_trace(go.Scatter3d(
+                x=coords[:,0], y=coords[:,1], z=coords[:,2],
+                mode='markers',
+                marker=dict(size=8, color='deepskyblue'),
+                name='Ligands (L)'
+            ))
+
+            for c in coords:
+                fig_3d.add_trace(go.Scatter3d(
+                    x=[0, c[0]], y=[0, c[1]], z=[0, c[2]],
+                    mode='lines',
+                    line=dict(color='gray', width=3),
+                    showlegend=False
+                ))
+
+            fig_3d.update_layout(
+                title=shape_title,
+                scene=dict(
+                    xaxis=dict(visible=False),
+                    yaxis=dict(visible=False),
+                    zaxis=dict(visible=False)
+                ),
+                margin=dict(l=0, r=0, b=0, t=30),
+                height=450
+            )
+            return fig_3d
+
+        st.plotly_chart(generate_3d_shape(shape_choice), use_container_width=True)
 
 # --- TAB 3: ORE PROCESSING & EXTRACTION ---
 with tab3:
