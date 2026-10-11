@@ -1,5 +1,4 @@
-
-    import streamlit as st
+import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -142,12 +141,12 @@ with tab2:
     shape_selection = st.selectbox(
         "Select Coordination Geometry to Inspect in 3D:",
         [
-            "CN = 6: Octahedron (e.g., La(acac)₃)",
-            "CN = 7: Monocapped Trigonal Prism (e.g., Ln₂O₃ B-type)",
-            "CN = 8: Square Antiprism (e.g., CeF₄, [Ce(acac)₄])",
-            "CN = 9: Tricapped Trigonal Prism (e.g., [Ln(H₂O)₉]³⁺)",
-            "CN = 10: Bicapped Square Antiprism (e.g., [La(EDTA)(H₂O)₄])",
-            "CN = 12: Icosahedron (e.g., [Ce(NO₃)₆]²⁻)"
+            "CN = 6: Octahedron (e.g., La(acac)₃)[cite: 37]",
+            "CN = 7: Monocapped Trigonal Prism (e.g., Ln₂O₃ B-type)[cite: 40]",
+            "CN = 8: Square Antiprism (e.g., CeF₄, [Ce(acac)₄])[cite: 44]",
+            "CN = 9: Tricapped Trigonal Prism (e.g., [Ln(H₂O)₉]³⁺)[cite: 47]",
+            "CN = 10: Bicapped Square Antiprism (e.g., [La(EDTA)(H₂O)₄])[cite: 49]",
+            "CN = 12: Icosahedron (e.g., [Ce(NO₃)₆]²⁻)[cite: 51]"
         ]
     )
 
